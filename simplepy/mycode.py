@@ -7,6 +7,6 @@ def i(text=""):
 def p(*args, **kwargs):
     return print(*args, **kwargs)
 
-def sum(a,b):
+def add(a,b):
     c = a+b
     return c
