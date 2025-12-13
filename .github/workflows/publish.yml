@@ -1,21 +1,49 @@
-name: Publish to PyPI
+name: Auto Release + Publish to PyPI
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # required for tags
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Extract version from setup.py
+        id: get_version
+        run: |
+          VERSION=$(python setup.py --version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag already exists. Skipping release."
+            exit 0
+          fi
+
+      - name: Create git tag
+        run: |
+          git tag v${{ steps.get_version.outputs.version }}
+          git push origin v${{ steps.get_version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          body_path: RELEASE.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install build tools
         run: |
