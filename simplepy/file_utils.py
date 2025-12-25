@@ -3,6 +3,35 @@ import shutil
 from .error_utils import xerror
 
 
+
+def xchdir(path):
+    try:
+        if not isinstance(path, str):
+            return xerror("TypeError", "path must be a string")
+
+        # If relative path, resolve from current directory
+        if not os.path.isabs(path):
+            path = os.path.join(os.getcwd(), path)
+
+        os.chdir(path)
+
+        # return new current directory
+        return os.getcwd()
+
+    except FileNotFoundError:
+        return xerror("FileNotFoundError", "directory not found")
+
+    except NotADirectoryError:
+        return xerror("NotADirectoryError", "path is not a directory")
+
+    except PermissionError:
+        return xerror("PermissionError", "permission denied")
+
+    except OSError as e:
+        return xerror("OSError", str(e))
+
+    except Exception:
+        return -1
 # -------------------------
 # PRESENT WORKING DIRECTORY
 # -------------------------
