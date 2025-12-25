@@ -1,3 +1,6 @@
+from .error_utils import xerror
+
+
 def xfind(container, target):
     try:
         # STRING, LIST, TUPLE
@@ -15,7 +18,7 @@ def xfind(container, target):
             else:
                 return indexes
 
-        # DICTIONARY (search keys and values)
+        # DICTIONARY
         elif isinstance(container, dict):
             results = []
 
@@ -38,35 +41,20 @@ def xfind(container, target):
                 return -1
 
         else:
-            msg = "TypeError: unsupported container type"
-            print(msg)
-            return msg
+            return xerror("TypeError", "unsupported container type")
 
     except TypeError as e:
-        msg = f"TypeError: {e}"
-        print(msg)
-        return msg
+        return xerror("TypeError", str(e))
 
     except ValueError as e:
-        msg = f"ValueError: {e}"
-        print(msg)
-        return msg
-
-    except IndexError as e:
-        msg = f"IndexError: {e}"
-        print(msg)
-        return msg
+        return xerror("ValueError", str(e))
 
     except KeyError as e:
-        msg = f"KeyError: {e}"
-        print(msg)
-        return msg
+        return xerror("KeyError", "key not found")
 
     except AttributeError as e:
-        msg = f"AttributeError: {e}"
-        print(msg)
-        return msg
+        return xerror("AttributeError", str(e))
 
     except Exception:
-        # Unknown error → silent safe fallback
+        # Unknown error → silent fallback
         return -1
