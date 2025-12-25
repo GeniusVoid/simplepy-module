@@ -20,6 +20,7 @@ from .count_utils import xcount
 # ---- file & directory I/O ----
 from .file_utils import (
     xpwd,
+    xchdir,
     xopen,
     xmkdir,
     xrmdir,
@@ -42,6 +43,7 @@ __all__ = [
 
     # file system
     "xpwd",
+    "xchdir",
     "xopen",
     "xmkdir",
     "xrmdir",
