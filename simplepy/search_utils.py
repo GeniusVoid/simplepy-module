@@ -1,60 +1,89 @@
-from .error_utils import xerror
+lfrom .error_utils import xerror
 
 
 def xfind(container, target):
     try:
-        # STRING, LIST, TUPLE
-        if isinstance(container, (str, list, tuple)):
+        # =========================
+        # STRING (character + substring)
+        # =========================
+        if isinstance(container, str):
+            if not isinstance(target, str):
+                return xerror("TypeError", "target must be a string for string search")
+
+            indexes = []
+            start = 0
+
+            while True:
+                pos = container.find(target, start)
+                if pos == -1:
+                    break
+                indexes.append(pos)
+                start = pos + 1  # allow overlapping
+
+            if not indexes:
+                return -1
+            if len(indexes) == 1:
+                return indexes[0]
+            return indexes
+
+        # =========================
+        # LIST / TUPLE
+        # =========================
+        elif isinstance(container, (list, tuple)):
             indexes = []
 
-            for i in range(len(container)):
-                if container[i] == target:
+            for i, value in enumerate(container):
+                if value == target:
                     indexes.append(i)
 
-            if len(indexes) == 0:
+            if not indexes:
                 return -1
-            elif len(indexes) == 1:
+            if len(indexes) == 1:
                 return indexes[0]
-            else:
-                return indexes
+            return indexes
 
-        # DICTIONARY
+        # =========================
+        # DICTIONARY (keys + values)
+        # =========================
         elif isinstance(container, dict):
-            results = []
+            keys = []
 
-            for key, value in container.items():
-                if key == target or value == target:
-                    results.append(key)
+            for k, v in container.items():
+                if k == target or v == target:
+                    keys.append(k)
 
-            if len(results) == 0:
+            if not keys:
                 return -1
-            elif len(results) == 1:
-                return results[0]
-            else:
-                return results
+            if len(keys) == 1:
+                return keys[0]
+            return keys
 
-        # SET
+        # =========================
+        # SET (no index exists)
+        # =========================
         elif isinstance(container, set):
-            if target in container:
-                return target
-            else:
-                return -1
+            return target if target in container else -1
 
+        # =========================
+        # UNSUPPORTED TYPE
+        # =========================
         else:
             return xerror("TypeError", "unsupported container type")
 
+    # =========================
+    # KNOWN ERRORS
+    # =========================
     except TypeError as e:
         return xerror("TypeError", str(e))
-
     except ValueError as e:
         return xerror("ValueError", str(e))
-
     except KeyError as e:
-        return xerror("KeyError", "key not found")
-
+        return xerror("KeyError", str(e))
     except AttributeError as e:
         return xerror("AttributeError", str(e))
 
+    # =========================
+    # UNKNOWN ERROR
+    # =========================
     except Exception:
-        # Unknown error → silent fallback
         return -1
