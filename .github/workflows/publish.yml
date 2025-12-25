@@ -1,58 +1,48 @@
-name: Auto Release + Publish to PyPI
+name: Manual Release + Version Controlled PyPI Publish
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "setup.py"
+
+  release:
+    types: [published]
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      # 🔥 FIX: install setuptools BEFORE running setup.py
-      - name: Install setuptools
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-
-      - name: Extract version from setup.py
-        id: get_version
-        run: |
-          VERSION=$(python setup.py --version)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check if tag exists
-        run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag already exists. Skipping release."
-            exit 0
-          fi
-
-      - name: Create git tag
-        run: |
-          git tag v${{ steps.get_version.outputs.version }}
-          git push origin v${{ steps.get_version.outputs.version }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          body_path: RELEASE.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Install build tools
         run: |
+          python -m pip install --upgrade pip
           pip install build twine
+
+      - name: Check version change in setup.py
+        id: version_check
+        run: |
+          OLD_VERSION=$(git show HEAD~1:setup.py | grep version= | sed "s/.*version=['\"]\(.*\)['\"].*/\1/")
+          NEW_VERSION=$(grep version= setup.py | sed "s/.*version=['\"]\(.*\)['\"].*/\1/")
+
+          echo "Old version: $OLD_VERSION"
+          echo "New version: $NEW_VERSION"
+
+          if [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
+            echo "❌ Version not changed. Aborting publish."
+            exit 1
+          fi
 
       - name: Build package
         run: |
