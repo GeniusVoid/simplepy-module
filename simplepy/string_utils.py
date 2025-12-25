@@ -15,7 +15,7 @@ def xfind(container, target):
             else:
                 return indexes
 
-        # DICTIONARY (search keys, then values)
+        # DICTIONARY (search keys and values)
         elif isinstance(container, dict):
             results = []
 
@@ -37,10 +37,36 @@ def xfind(container, target):
             else:
                 return -1
 
-        # UNSUPPORTED TYPE
         else:
-            return -1
+            msg = "TypeError: unsupported container type"
+            print(msg)
+            return msg
+
+    except TypeError as e:
+        msg = f"TypeError: {e}"
+        print(msg)
+        return msg
+
+    except ValueError as e:
+        msg = f"ValueError: {e}"
+        print(msg)
+        return msg
+
+    except IndexError as e:
+        msg = f"IndexError: {e}"
+        print(msg)
+        return msg
+
+    except KeyError as e:
+        msg = f"KeyError: {e}"
+        print(msg)
+        return msg
+
+    except AttributeError as e:
+        msg = f"AttributeError: {e}"
+        print(msg)
+        return msg
 
     except Exception:
-        # ABSOLUTE SAFETY: never raise error
+        # Unknown error → silent safe fallback
         return -1
